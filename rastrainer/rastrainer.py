@@ -33,6 +33,9 @@ from .resources import *
 from .rastrainer_dialog import rastrainerDialog
 import os.path
 
+# add
+from qgis.core import QgsMapLayerProxyModel
+
 
 class rastrainer:
     """QGIS Plugin Implementation."""
@@ -68,6 +71,11 @@ class rastrainer:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+
+        # add
+        self.model_list = ["OCRNet_HRNetw18"]
+        self.batch_size_list = [str(2 ** i) for i in range(10)]
+        self.log_list = [str(10 * i) for i in range(1, 10)]
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -190,6 +198,14 @@ class rastrainer:
         if self.first_start == True:
             self.first_start = False
             self.dlg = rastrainerDialog()
+        # setting
+        self.dlg.mcbxRaster.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dlg.mcbxMask.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dlg.mcbxShp.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.dlg.mQfwPretrained.setFilter("*.pdparams")
+        self.dlg.cbxModel.addItems(self.model_list)
+        self.dlg.cbxBatch.addItems(self.batch_size_list)
+        self.dlg.cbxLog.addItems(self.log_list)
 
         # show the dialog
         self.dlg.show()
