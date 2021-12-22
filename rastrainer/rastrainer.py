@@ -27,6 +27,8 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
+from rastrainer.utils.datasets import create_dataset
+
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
@@ -34,7 +36,9 @@ from .rastrainer_dialog import rastrainerDialog
 import os.path
 
 # add
+import os.path as osp
 from qgis.core import QgsMapLayerProxyModel
+from .utils import MODELS, Model
 
 
 class rastrainer:
@@ -73,7 +77,7 @@ class rastrainer:
         self.first_start = None
 
         # add
-        self.model_list = ["OCRNet_HRNetw18"]
+        self.model_list = MODELS
         self.batch_size_list = [str(2 ** i) for i in range(10)]
         self.log_list = [str(10 * i) for i in range(1, 10)]
 
@@ -190,6 +194,22 @@ class rastrainer:
             self.iface.removeToolBarIcon(action)
 
 
+    def change_classes(self):
+        self.num_class = int(self.dlg.edtClasses.Text())
+        self.select_model()
+
+
+    def select_model(self):
+        self.modeler = Model(self.dlg.cbxModel.currentText(), self.num_class)
+        self.dlg.mQfwPretrained.setFilePath("")
+
+    
+    def select_params_file(self):
+        param_file = self.dlg.mQfwPretrained.filePath()
+        if self.modeler is not None:
+            self.modeler.load_weight(param_file)
+
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -198,14 +218,19 @@ class rastrainer:
         if self.first_start == True:
             self.first_start = False
             self.dlg = rastrainerDialog()
+            self.num_class = 2
+            self.modeler = Model(MODELS[0], self.num_class)
         # setting
         self.dlg.mcbxRaster.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.dlg.mcbxMask.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.dlg.mcbxShp.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.dlg.mQfwPretrained.setFilter("*.pdparams")
+        self.dlg.mQfwPretrained.fileChanged.connect(self.select_params_file)
         self.dlg.cbxModel.addItems(self.model_list)
+        self.dlg.cbxModel.currentTextChanged.connect(self.select_model)
         self.dlg.cbxBatch.addItems(self.batch_size_list)
         self.dlg.cbxLog.addItems(self.log_list)
+        self.dlg.edtClasses.textChanged.connect(self.change_classes)
 
         # show the dialog
         self.dlg.show()
@@ -215,4 +240,23 @@ class rastrainer:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            pass
+            dataset_root = "dataset"  # DEBUG: test
+            self.num_class = int(self.dlg.edtClasses.Text())  # TODO: check number
+            self.modeler = Model(self.dlg.cbxModel.currentText(),
+                                 self.num_class,
+                                 self.dlg.mQfwPretrained.filePath())
+
+            train_datas, val_datas = create_dataset(dataset_root, self.num_class)
+
+            args = {
+                "learning_rate": float(self.dlg.edtLearning.Text()),  # TODO: check number
+                "epochs": int(self.dlg.edtEpoch.Text()),  # TODO: check number
+                "batch_size": int(self.dlg.cbxBatch.currentText()),
+                "train_dataset":train_datas,
+                "val_dataset": val_datas,
+                "save_dir": self.dlg.mQfwOutput.filePath(),
+                "save_number": int(self.dlg.edtEval.Text()),  # TODO: check number
+                "log_iters": int(self.dlg.cbxLog.currentText())
+            }
+
+            self.modeler.train(args)
