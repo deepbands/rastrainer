@@ -61,8 +61,8 @@ val_dataset = Dataset(
     transforms=val_transforms,
     dataset_root="data/dataset",
     num_classes=2,
-    mode="train",  # If your data does not need `initmask()`, please use "val"（如果你的数据不需要`InitMask()`，请使用val"）
-    train_path="data/dataset/val.txt",
+    mode="val",  # If your data does not need `initmask()`, please use "val"（如果你的数据不需要`InitMask()`，请使用val"）
+    val_path="data/dataset/val.txt",
     separator=" "
 )
 

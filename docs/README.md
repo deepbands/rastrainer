@@ -1,0 +1,1 @@
+# Download the models from [PaddleSeg Model Zoo](https://github.com/PaddlePaddle/PaddleSeg/blob/release/2.3/docs/model_zoo_overview.md)
