@@ -195,7 +195,7 @@ class rastrainer:
 
 
     def change_classes(self):
-        self.num_class = int(self.dlg.edtClasses.Text())
+        self.num_class = int(self.dlg.edtClasses.text())  # TODO: check number
         self.select_model()
 
 
@@ -241,21 +241,21 @@ class rastrainer:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             dataset_root = "dataset"  # DEBUG: test
-            self.num_class = int(self.dlg.edtClasses.Text())  # TODO: check number
-            self.modeler = Model(self.dlg.cbxModel.currentText(),
-                                 self.num_class,
-                                 self.dlg.mQfwPretrained.filePath())
+            # self.num_class = int(self.dlg.edtClasses.text())
+            # self.modeler = Model(self.dlg.cbxModel.currentText(),
+            #                      self.num_class,
+            #                      self.dlg.mQfwPretrained.filePath())
 
             train_datas, val_datas = create_dataset(dataset_root, self.num_class)
 
             args = {
-                "learning_rate": float(self.dlg.edtLearning.Text()),  # TODO: check number
-                "epochs": int(self.dlg.edtEpoch.Text()),  # TODO: check number
+                "learning_rate": float(self.dlg.edtLearning.text()),  # TODO: check number
+                "epochs": int(self.dlg.edtEpoch.text()),  # TODO: check number
                 "batch_size": int(self.dlg.cbxBatch.currentText()),
                 "train_dataset":train_datas,
                 "val_dataset": val_datas,
                 "save_dir": self.dlg.mQfwOutput.filePath(),
-                "save_number": int(self.dlg.edtEval.Text()),  # TODO: check number
+                "save_number": int(self.dlg.edtEval.text()),  # TODO: check number
                 "log_iters": int(self.dlg.cbxLog.currentText())
             }
 

@@ -19,7 +19,7 @@ class Model:
             self.net = OCRNet(num_classes=classes, backbone=HRNet_W18(), backbone_indices=[0])
             self.loss_coef = [1, 0.4]
         elif model_name == "SegFormer_B2":
-            self.net = SegFormer_B2(num_classes=classes)  # BUG: load crash
+            self.net = SegFormer_B2(num_classes=classes)
             self.loss_coef = [1]
         else:  # model_name == "BiSeNetV2"
             self.net = BiSeNetV2(num_classes=classes)
@@ -75,5 +75,5 @@ class Model:
 
 
 if __name__ == "__main__":
-    model = Model("OCRNet_HRNetw18")
+    model = Model("SegFormer_B2")
     print(model)
