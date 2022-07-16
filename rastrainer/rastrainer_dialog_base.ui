@@ -136,7 +136,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QgsMapLayerComboBox" name="mcbxShp"/>
+            <widget class="QgsMapLayerComboBox" name="mcbxShp">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

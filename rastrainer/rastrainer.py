@@ -27,8 +27,6 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from rastrainer.utils.datasets import create_dataset
-
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
@@ -38,7 +36,9 @@ import os.path
 # add
 import os.path as osp
 from qgis.core import QgsMapLayerProxyModel
-from .utils import MODELS, Model
+from .utils import (
+    MODELS, Model, QTrainDaraset, QEvalDaraset, Raster
+)
 
 
 class rastrainer:
@@ -77,7 +77,6 @@ class rastrainer:
         self.first_start = None
 
         # add
-        self.model_list = MODELS
         self.batch_size_list = [str(2 ** i) for i in range(10)]
         self.log_list = [str(10 * i) for i in range(1, 10)]
 
@@ -195,19 +194,16 @@ class rastrainer:
 
 
     def change_classes(self):
-        self.num_class = int(self.dlg.edtClasses.text())  # TODO: check number
-        self.select_model()
+        self.num_class = int(self.dlg.edtClasses.text())
 
 
     def select_model(self):
-        self.modeler = Model(self.dlg.cbxModel.currentText(), self.num_class)
-        self.dlg.mQfwPretrained.setFilePath("")
-
+        self.model_name = self.dlg.cbxModel.currentText()
+        
     
     def select_params_file(self):
         param_file = self.dlg.mQfwPretrained.filePath()
-        if self.modeler is not None:
-            self.modeler.load_weight(param_file)
+        self.param_file = param_file if param_file != "" else None
 
 
     def run(self):
@@ -219,14 +215,15 @@ class rastrainer:
             self.first_start = False
             self.dlg = rastrainerDialog()
             self.num_class = 2
-            self.modeler = Model(MODELS[0], self.num_class)
+            self.model_name = MODELS[0]
+            self.param_file = None
         # setting
         self.dlg.mcbxRaster.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.dlg.mcbxMask.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.dlg.mcbxShp.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.dlg.mQfwPretrained.setFilter("*.pdparams")
         self.dlg.mQfwPretrained.fileChanged.connect(self.select_params_file)
-        self.dlg.cbxModel.addItems(self.model_list)
+        self.dlg.cbxModel.addItems(MODELS)
         self.dlg.cbxModel.currentTextChanged.connect(self.select_model)
         self.dlg.cbxBatch.addItems(self.batch_size_list)
         self.dlg.cbxLog.addItems(self.log_list)
@@ -240,22 +237,26 @@ class rastrainer:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            dataset_root = "dataset"  # DEBUG: test
-            # self.num_class = int(self.dlg.edtClasses.text())
-            # self.modeler = Model(self.dlg.cbxModel.currentText(),
-            #                      self.num_class,
-            #                      self.dlg.mQfwPretrained.filePath())
-
-            train_datas, val_datas = create_dataset(dataset_root, self.num_class)
+            self.num_class = int(self.dlg.edtClasses.text())
+            self.modeler = Model(
+                self.model_name,
+                self.num_class,
+                self.param_file
+            )
+            # TODO: TEST
+            image_path = "testdata/test.tif"
+            label_path = "testdata/lab2.tif"
+            train_datas = QTrainDaraset(image_path, label_path, self.num_class)
+            val_datas = None
 
             args = {
-                "learning_rate": float(self.dlg.edtLearning.text()),  # TODO: check number
-                "epochs": int(self.dlg.edtEpoch.text()),  # TODO: check number
+                "learning_rate": float(self.dlg.edtLearning.text()),
+                "epochs": int(self.dlg.edtEpoch.text()),
                 "batch_size": int(self.dlg.cbxBatch.currentText()),
                 "train_dataset":train_datas,
                 "val_dataset": val_datas,
                 "save_dir": self.dlg.mQfwOutput.filePath(),
-                "save_number": int(self.dlg.edtEval.text()),  # TODO: check number
+                "save_number": int(self.dlg.edtEval.text()),
                 "log_iters": int(self.dlg.cbxLog.currentText())
             }
 

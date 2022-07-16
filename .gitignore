@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 docs/training/output_segformer/best_model/model.pdparams
 dataset
+
+# test
+testdata
