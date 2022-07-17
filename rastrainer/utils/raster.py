@@ -139,7 +139,7 @@ class Raster:
         return tmp
 
     @classmethod
-    def get_type(self, type_name: str) -> int:
+    def get_type(cls, type_name: str) -> int:
         if type_name in ["bool", "uint8"]:
             gdal_type = gdal.GDT_Byte
         elif type_name in ["int8", "int16"]:
@@ -161,7 +161,7 @@ class Raster:
         return gdal_type
 
     @classmethod
-    def to_uint8(self, im, is_linear=False):
+    def to_uint8(cls, im, is_linear=False):
         # 2% linear stretch
         def _two_percent_linear(image, max_out=255, min_out=0):
             def _gray_process(gray, maxout=max_out, minout=min_out):
@@ -203,7 +203,8 @@ class Raster:
         return im
 
     @classmethod
-    def save_geotiff(image: np.ndarray, 
+    def save_geotiff(cls,
+                     image: np.ndarray, 
                      save_path: str, 
                      proj: str, 
                      geotf: Tuple,

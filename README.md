@@ -10,12 +10,7 @@ rastrainer is a QGIS plugin to training remote sensing semantic segmentation mod
 
 ## TODO
 
-- [x] Init UI.
-- [ ] Add Block.
-- [ ] Add load params.
-- [ ] Add data pipeline.
-- [ ] Add training.
-- [ ] Add you can select a model.
-- [ ] Add you can select transform.
-- [ ] Add you can select Optimizer / Learning rate adjustment.
-- [ ] etc...
+- [x] Complete basic training.
+- [ ] Add eval.
+- [ ] Add range select.
+- [ ] Avoid non response (display log).
